@@ -6,3 +6,4 @@
 
 The program reads from a file passed as the first argument.
 
+All images are published and tagged by release at `docker.io/cisourcerer/dfparse:<tag>` (replace `<tag>` with the desired release tag when pulling or referencing the image).
