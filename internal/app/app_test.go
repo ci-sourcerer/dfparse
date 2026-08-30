@@ -20,12 +20,12 @@ func writeTempDockerfile(t *testing.T, content string) string {
 		t.Fatalf("write temp Dockerfile: %v", err)
 	}
 
+	t.Cleanup(func() { os.Remove(f.Name()) })
 	return f.Name()
 }
 
 func TestRun_DumpsAST(t *testing.T) {
 	path := writeTempDockerfile(t, "FROM alpine\n")
-	defer os.Remove(path)
 
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{path}, &stdout, &stderr)
@@ -53,5 +53,31 @@ func TestRun_Help(t *testing.T) {
 	}
 	if !strings.Contains(stderr.String(), "Usage: dfparse") {
 		t.Fatalf("expected usage output on stderr, got %q", stderr.String())
+	}
+}
+
+func TestRun_Errors(t *testing.T) {
+	tests := []struct {
+		name     string
+		args     []string
+		wantCode int
+	}{
+		{"no args", []string{}, 2},
+		{"too many args", []string{"a", "b"}, 2},
+		{"unrecognised flag", []string{"--foo"}, 2},
+		{"nonexistent file", []string{"/nonexistent/path/Dockerfile"}, 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			code := Run(tt.args, &stdout, &stderr)
+			if code != tt.wantCode {
+				t.Errorf("expected exit %d, got %d (stderr: %q)", tt.wantCode, code, stderr.String())
+			}
+			if stdout.Len() != 0 {
+				t.Errorf("expected no stdout output, got %q", stdout.String())
+			}
+		})
 	}
 }
