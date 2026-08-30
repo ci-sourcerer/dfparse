@@ -36,8 +36,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 
 	f, err := os.Open(fs.Arg(0))
 	if err != nil {
-		fmt.Fprintln(stderr, "open:", err)
-		return 2
+		fmt.Fprintln(stderr, err)
+		return 1
 	}
 	defer f.Close()
 	var r io.Reader = f
@@ -45,13 +45,13 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	res, err := parser.Parse(r)
 	if err != nil {
 		fmt.Fprintln(stderr, "parse:", err)
-		return 2
+		return 1
 	}
 
 	out, err := json.Marshal(res.AST)
 	if err != nil {
 		fmt.Fprintln(stderr, "marshal:", err)
-		return 2
+		return 1
 	}
 
 	fmt.Fprintln(stdout, string(out))
