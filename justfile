@@ -3,7 +3,7 @@ build:
 	go build -o dist/dfparse ./cmd/dfparse
 
 build-image:
-    docker build -t dfparse:latest .
+	docker build -t dfparse:latest .
 
 clean:
 	@rm -rf dist
