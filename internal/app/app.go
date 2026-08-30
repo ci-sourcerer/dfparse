@@ -40,20 +40,16 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 	defer f.Close()
-	var r io.Reader = f
 
-	res, err := parser.Parse(r)
+	res, err := parser.Parse(f)
 	if err != nil {
 		fmt.Fprintln(stderr, "parse:", err)
 		return 1
 	}
 
-	out, err := json.Marshal(res.AST)
-	if err != nil {
-		fmt.Fprintln(stderr, "marshal:", err)
+	if err := json.NewEncoder(stdout).Encode(res.AST); err != nil {
+		fmt.Fprintln(stderr, "encode:", err)
 		return 1
 	}
-
-	fmt.Fprintln(stdout, string(out))
 	return 0
 }
